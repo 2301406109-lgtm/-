@@ -125,51 +125,12 @@
         </div>
     </div>
     
-    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
     <script>
-        // WebSocket连接
-        const socket = io();
-        
-        // 连接状态处理
-        socket.on('connectionStatus', (data) => {
-            console.log('连接状态:', data.connected);
-            if (data.connected) {
-                document.getElementById('led-status').textContent = '已连接';
-                document.getElementById('motor-status').textContent = '已连接';
-            } else {
-                document.getElementById('led-status').textContent = '未连接';
-                document.getElementById('motor-status').textContent = '未连接';
-            }
-        });
-        
-        // 传感器数据处理
-        socket.on('sensorData', (data) => {
-            console.log('收到传感器数据:', data);
-            // 解析传感器数据
-            // 这里假设数据格式为 "TEMP:25.5,HUM:65.2,LIGHT:500"
-            const values = data.data.split(',');
-            values.forEach(value => {
-                const [type, val] = value.split(':');
-                switch(type) {
-                    case 'TEMP':
-                        document.getElementById('temperature').textContent = val + '°C';
-                        break;
-                    case 'HUM':
-                        document.getElementById('humidity').textContent = val + '%';
-                        break;
-                    case 'LIGHT':
-                        document.getElementById('light').textContent = val + 'lux';
-                        break;
-                }
-            });
-        });
-        
         // 控制函数
         function controlLED(status) {
             document.getElementById('led-status').textContent = status === 'on' ? '开启' : '关闭';
             console.log('控制LED:', status);
-            // 发送控制命令到服务器
-            socket.emit('controlLED', status);
+            // 这里可以添加发送控制命令的代码
         }
         
         function controlMotor(direction) {
@@ -187,18 +148,16 @@
             }
             document.getElementById('motor-status').textContent = statusText;
             console.log('控制电机:', direction);
-            // 发送控制命令到服务器
-            socket.emit('controlMotor', direction);
+            // 这里可以添加发送控制命令的代码
         }
         
         function updatePWM(value) {
             document.getElementById('pwm-value').textContent = value;
             console.log('更新PWM值:', value);
-            // 发送控制命令到服务器
-            socket.emit('controlPWM', value);
+            // 这里可以添加发送控制命令的代码
         }
         
-        // 模拟传感器数据更新（当串口未连接时使用）
+        // 模拟传感器数据更新
         function updateSensorData() {
             // 模拟数据
             const temperature = (Math.random() * 10 + 20).toFixed(1);
@@ -210,11 +169,15 @@
             document.getElementById('light').textContent = light + 'lux';
         }
         
-        // 每2秒更新一次传感器数据（仅作为备用）
+        // 每2秒更新一次传感器数据
         setInterval(updateSensorData, 2000);
         
         // 初始更新
         updateSensorData();
+        
+        // 初始状态
+        document.getElementById('led-status').textContent = '已连接';
+        document.getElementById('motor-status').textContent = '已连接';
     </script>
 </body>
 </html>
