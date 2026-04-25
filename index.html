@@ -114,14 +114,17 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 40px;
         }
         
         .data-card {
             background-color: #1e1e1e;
             border-radius: 8px;
-            padding: 20px;
+            padding: 25px;
             border-left: 4px solid;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
         }
         
         .data-card.normal {
@@ -137,26 +140,28 @@
         }
         
         .data-card .label {
-            font-size: 12px;
+            font-size: 14px;
             color: #888;
-            margin-bottom: 5px;
-        }
-        
-        .data-card .value {
-            font-size: 24px;
-            font-weight: bold;
             margin-bottom: 10px;
         }
         
+        .data-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
         .data-card .trend {
-            font-size: 12px;
+            font-size: 14px;
             color: #888;
+            margin-bottom: 15px;
         }
         
         .data-card .threshold {
-            font-size: 10px;
+            font-size: 12px;
             color: #666;
-            margin-top: 10px;
+            margin-top: auto;
+            margin-bottom: 15px;
         }
         
         .control-buttons {
@@ -167,13 +172,13 @@
         
         .adjust-btn {
             flex: 1;
-            padding: 8px;
+            padding: 10px;
             background-color: #333;
             color: white;
             border: 1px solid #555;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
         }
         
@@ -181,34 +186,13 @@
             background-color: #444;
         }
         
-        /* 图表区域 */
-        .chart-section {
-            background-color: #1e1e1e;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .chart-section h3 {
-            font-size: 14px;
-            margin-bottom: 15px;
-            color: #888;
-        }
-        
-        .chart-container {
-            height: 300px;
-            position: relative;
-        }
-        
-        /* 右侧信息面板 */
+        /* 设备状态面板 */
         .info-panel {
-            position: absolute;
-            top: 80px;
-            right: 20px;
-            width: 300px;
             background-color: #1e1e1e;
             border-radius: 8px;
             padding: 20px;
+            margin: 0 auto;
+            max-width: 1200px;
         }
         
         .info-panel h3 {
@@ -289,12 +273,6 @@
         
         /* 响应式设计 */
         @media (max-width: 1200px) {
-            .info-panel {
-                position: static;
-                width: 100%;
-                margin-top: 20px;
-            }
-            
             .data-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -347,7 +325,7 @@
                 <div class="data-grid">
                     <div class="data-card normal">
                         <div class="label">温度</div>
-                        <div class="value">26.4°C</div>
+                        <div class="value">26°C</div>
                         <div class="trend">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M8 3L4 7H12L8 3Z" fill="#4CAF50"/>
@@ -363,7 +341,7 @@
                     
                     <div class="data-card warning">
                         <div class="label">水位</div>
-                        <div class="value">68.2%</div>
+                        <div class="value">68%</div>
                         <div class="trend">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M8 3L12 7H4L8 3Z" fill="#ff9800"/>
@@ -394,7 +372,7 @@
                     </div>
                 </div>
                 
-                <!-- 右侧信息面板 -->
+                <!-- 设备状态面板 -->
                 <div class="info-panel">
                     <!-- 设备状态 -->
                     <div class="device-status">
@@ -460,8 +438,8 @@
     <script>
         // 全局变量存储当前值
         let currentValues = {
-            temperature: 26.4,
-            humidity: 68.2,
+            temperature: 26,
+            humidity: 68,
             light: 1240
         };
         
@@ -470,12 +448,12 @@
             switch(type) {
                 case 'temperature':
                     currentValues.temperature = Math.max(0, Math.min(100, currentValues.temperature + delta));
-                    document.querySelector('.data-card:nth-child(1) .value').textContent = currentValues.temperature.toFixed(1) + '°C';
+                    document.querySelector('.data-card:nth-child(1) .value').textContent = Math.round(currentValues.temperature) + '°C';
                     updateStatus();
                     break;
                 case 'humidity':
                     currentValues.humidity = Math.max(0, Math.min(100, currentValues.humidity + delta));
-                    document.querySelector('.data-card:nth-child(2) .value').textContent = currentValues.humidity.toFixed(1) + '%';
+                    document.querySelector('.data-card:nth-child(2) .value').textContent = Math.round(currentValues.humidity) + '%';
                     updateStatus();
                     break;
                 case 'light':
