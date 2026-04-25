@@ -441,13 +441,6 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- 系统状态 -->
-                <div class="system-status">
-                    <div>SYSTEM STATUS</div>
-                    <div>ALL SYSTEMS: <span class="online">ONLINE</span></div>
-                    <div>LAST SYNC: 12:34:07</div>
-                </div>
             </div>
         </div>
     </div>
@@ -544,7 +537,7 @@
             // 控制水泵：水位低于30%时启动，高于或等于90%时关闭
             const pumpStatus = currentValues.humidity < 30 && currentValues.humidity < 90;
             const pumpElement = document.querySelector('.device-item:nth-child(1) .status-indicator');
-            const pumpText = document.querySelector('.device-item:nth-child(1) span:nth-child(3)');
+            const pumpText = document.querySelector('.device-item:nth-child(1) div span:nth-child(3)');
             if (pumpStatus) {
                 pumpElement.className = 'status-indicator on';
                 pumpText.textContent = 'ON';
@@ -556,7 +549,7 @@
             // 控制加热器：温度低于20°C时启动，高于或等于80°C时关闭
             const heaterStatus = currentValues.temperature < 20 && currentValues.temperature < 80;
             const heaterElement = document.querySelector('.device-item:nth-child(3) .status-indicator');
-            const heaterText = document.querySelector('.device-item:nth-child(3) span:nth-child(3)');
+            const heaterText = document.querySelector('.device-item:nth-child(3) div span:nth-child(3)');
             if (heaterStatus) {
                 heaterElement.className = 'status-indicator on';
                 heaterText.textContent = 'ON';
@@ -593,7 +586,7 @@
         function toggleDevice(device) {
             if (device === 'pump') {
                 const pumpElement = document.querySelector('.device-item:nth-child(1) .status-indicator');
-                const pumpText = document.querySelector('.device-item:nth-child(1) span:nth-child(3)');
+                const pumpText = document.querySelector('.device-item:nth-child(1) div span:nth-child(3)');
                 if (pumpElement.classList.contains('on')) {
                     pumpElement.className = 'status-indicator off';
                     pumpText.textContent = 'OFF';
@@ -603,7 +596,7 @@
                 }
             } else if (device === 'heater') {
                 const heaterElement = document.querySelector('.device-item:nth-child(3) .status-indicator');
-                const heaterText = document.querySelector('.device-item:nth-child(3) span:nth-child(3)');
+                const heaterText = document.querySelector('.device-item:nth-child(3) div span:nth-child(3)');
                 if (heaterElement.classList.contains('on')) {
                     heaterElement.className = 'status-indicator off';
                     heaterText.textContent = 'OFF';
