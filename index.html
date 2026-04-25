@@ -13,8 +13,8 @@
         
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #121212;
-            color: #ffffff;
+            background-color: #f5f5f5;
+            color: #333333;
             height: 100vh;
             overflow: hidden;
         }
@@ -27,8 +27,8 @@
         /* 左侧导航栏 */
         .sidebar {
             width: 200px;
-            background-color: #1e1e1e;
-            border-right: 1px solid #333;
+            background-color: #ffffff;
+            border-right: 1px solid #e0e0e0;
             padding: 20px 0;
         }
         
@@ -49,12 +49,12 @@
         }
         
         .nav-item:hover {
-            background-color: #333;
+            background-color: #f0f0f0;
         }
         
         .nav-item.active {
             background-color: #00aaff;
-            color: #121212;
+            color: white;
             font-weight: bold;
         }
         
@@ -69,8 +69,8 @@
         /* 顶部栏 */
         .header {
             height: 60px;
-            background-color: #1e1e1e;
-            border-bottom: 1px solid #333;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -84,7 +84,7 @@
         
         .header .status {
             font-size: 12px;
-            color: #888;
+            color: #666666;
         }
         
         .manual-btn {
@@ -118,13 +118,14 @@
         }
         
         .data-card {
-            background-color: #1e1e1e;
+            background-color: #ffffff;
             border-radius: 8px;
             padding: 25px;
             border-left: 4px solid;
             min-height: 220px;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .data-card.normal {
@@ -141,7 +142,7 @@
         
         .data-card .label {
             font-size: 14px;
-            color: #888;
+            color: #666666;
             margin-bottom: 10px;
         }
         
@@ -149,17 +150,18 @@
             font-size: 32px;
             font-weight: bold;
             margin-bottom: 15px;
+            color: #333333;
         }
         
         .data-card .trend {
             font-size: 14px;
-            color: #888;
+            color: #666666;
             margin-bottom: 15px;
         }
         
         .data-card .threshold {
             font-size: 12px;
-            color: #666;
+            color: #999999;
             margin-top: auto;
             margin-bottom: 15px;
         }
@@ -173,9 +175,9 @@
         .adjust-btn {
             flex: 1;
             padding: 10px;
-            background-color: #333;
-            color: white;
-            border: 1px solid #555;
+            background-color: #f0f0f0;
+            color: #333333;
+            border: 1px solid #e0e0e0;
             border-radius: 4px;
             cursor: pointer;
             font-size: 18px;
@@ -183,22 +185,23 @@
         }
         
         .adjust-btn:hover {
-            background-color: #444;
+            background-color: #e0e0e0;
         }
         
         /* 设备状态面板 */
         .info-panel {
-            background-color: #1e1e1e;
+            background-color: #ffffff;
             border-radius: 8px;
             padding: 20px;
             margin: 0 auto;
             max-width: 1200px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .info-panel h3 {
             font-size: 14px;
             margin-bottom: 15px;
-            color: #888;
+            color: #666666;
         }
         
         /* 设备状态 */
@@ -211,11 +214,12 @@
             justify-content: space-between;
             align-items: center;
             padding: 8px 0;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid #e0e0e0;
         }
         
         .device-item .name {
             font-size: 12px;
+            color: #333333;
         }
         
         .device-item .status-indicator {
@@ -240,12 +244,13 @@
         
         .event-item {
             padding: 8px 0;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid #e0e0e0;
             font-size: 12px;
+            color: #333333;
         }
         
         .event-item .time {
-            color: #888;
+            color: #999999;
             margin-right: 10px;
         }
         
@@ -263,7 +268,7 @@
             bottom: 20px;
             left: 220px;
             font-size: 12px;
-            color: #888;
+            color: #666666;
         }
         
         .system-status .online {
@@ -325,7 +330,7 @@
                 <div class="data-grid">
                     <div class="data-card normal">
                         <div class="label">温度</div>
-                        <div class="value">26°C</div>
+                        <div class="value">26.4°C</div>
                         <div class="trend">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M8 3L4 7H12L8 3Z" fill="#4CAF50"/>
@@ -334,8 +339,8 @@
                         </div>
                         <div class="threshold">THRESHOLD: 20-30°C</div>
                         <div class="control-buttons">
-                            <button class="adjust-btn" onclick="adjustValue('temperature', -1)">-</button>
-                            <button class="adjust-btn" onclick="adjustValue('temperature', 1)">+</button>
+                            <button class="adjust-btn" onclick="adjustValue('temperature', -0.1)">-</button>
+                            <button class="adjust-btn" onclick="adjustValue('temperature', 0.1)">+</button>
                         </div>
                     </div>
                     
@@ -438,7 +443,7 @@
     <script>
         // 全局变量存储当前值
         let currentValues = {
-            temperature: 26,
+            temperature: 26.4,
             humidity: 68,
             light: 1240
         };
@@ -448,7 +453,7 @@
             switch(type) {
                 case 'temperature':
                     currentValues.temperature = Math.max(0, Math.min(100, currentValues.temperature + delta));
-                    document.querySelector('.data-card:nth-child(1) .value').textContent = Math.round(currentValues.temperature) + '°C';
+                    document.querySelector('.data-card:nth-child(1) .value').textContent = currentValues.temperature.toFixed(1) + '°C';
                     updateStatus();
                     break;
                 case 'humidity':
