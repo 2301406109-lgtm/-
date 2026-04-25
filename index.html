@@ -188,6 +188,21 @@
             background-color: #e0e0e0;
         }
         
+        .control-btn {
+            margin-left: 10px;
+            padding: 4px 8px;
+            background-color: #00aaff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .control-btn:hover {
+            background-color: #0088cc;
+        }
+        
         /* 设备状态面板 */
         .info-panel {
             background-color: #ffffff;
@@ -317,7 +332,6 @@
                     <h1>实时监控</h1>
                     <div class="status">更新于 2025-01-15 12:34:07</div>
                 </div>
-                <button class="manual-btn">手动设置</button>
             </div>
             
             <!-- 内容区域 -->
@@ -333,7 +347,7 @@
                             </svg>
                             <span style="color: #4CAF50;">NORMAL</span>
                         </div>
-                        <div class="threshold">THRESHOLD: 20-30°C</div>
+                        <div class="threshold">THRESHOLD: 30-50°C</div>
                         <div class="control-buttons">
                                 <button class="adjust-btn" onclick="adjustValue('temperature', -1)">-</button>
                                 <button class="adjust-btn" onclick="adjustValue('temperature', 1)">+</button>
@@ -349,7 +363,7 @@
                             </svg>
                             <span style="color: #ff9800;">WARNING</span>
                         </div>
-                        <div class="threshold">THRESHOLD: 60-90%</div>
+                        <div class="threshold">THRESHOLD: 30-60%</div>
                         <div class="control-buttons">
                             <button class="adjust-btn" onclick="adjustValue('humidity', -1)">-</button>
                             <button class="adjust-btn" onclick="adjustValue('humidity', 1)">+</button>
@@ -384,6 +398,7 @@
                                 <span>12:28:05</span>
                                 <span class="status-indicator off"></span>
                                 <span>OFF</span>
+                                <button class="control-btn" onclick="toggleDevice('pump')">切换</button>
                             </div>
                         </div>
                         <div class="device-item">
@@ -396,6 +411,7 @@
                                 <span>11:58:08</span>
                                 <span class="status-indicator off"></span>
                                 <span>OFF</span>
+                                <button class="control-btn" onclick="toggleDevice('heater')">切换</button>
                             </div>
                         </div>
                         <div class="device-item">
@@ -448,7 +464,7 @@
         function adjustValue(type, delta) {
             switch(type) {
                 case 'temperature':
-                    currentValues.temperature = Math.max(2, Math.min(80, currentValues.temperature + delta));
+                    currentValues.temperature = Math.max(2, Math.min(100, currentValues.temperature + delta));
                     document.querySelector('.data-card:nth-child(1) .value').textContent = currentValues.temperature + '°C';
                     updateStatus();
                     break;
@@ -471,11 +487,11 @@
             // 更新温度状态
             const tempCard = document.querySelector('.data-card:nth-child(1)');
             tempCard.className = 'data-card';
-            if (currentValues.temperature >= 20 && currentValues.temperature <= 30) {
+            if (currentValues.temperature >= 30 && currentValues.temperature <= 50) {
                 tempCard.classList.add('normal');
                 tempCard.querySelector('.trend span').textContent = 'NORMAL';
                 tempCard.querySelector('.trend span').style.color = '#4CAF50';
-            } else if (currentValues.temperature < 20) {
+            } else if (currentValues.temperature < 30) {
                 tempCard.classList.add('warning');
                 tempCard.querySelector('.trend span').textContent = 'LOW';
                 tempCard.querySelector('.trend span').style.color = '#ff9800';
@@ -488,11 +504,11 @@
             // 更新水位状态
             const humidityCard = document.querySelector('.data-card:nth-child(2)');
             humidityCard.className = 'data-card';
-            if (currentValues.humidity >= 60 && currentValues.humidity <= 90) {
+            if (currentValues.humidity >= 30 && currentValues.humidity <= 60) {
                 humidityCard.classList.add('normal');
                 humidityCard.querySelector('.trend span').textContent = 'NORMAL';
                 humidityCard.querySelector('.trend span').style.color = '#4CAF50';
-            } else if (currentValues.humidity < 60) {
+            } else if (currentValues.humidity < 30) {
                 humidityCard.classList.add('warning');
                 humidityCard.querySelector('.trend span').textContent = 'LOW';
                 humidityCard.querySelector('.trend span').style.color = '#ff9800';
@@ -525,10 +541,10 @@
         
         // 自动控制设备状态
         function updateDeviceStatus() {
-            // 控制水泵：水位低于60%时启动
-            const pumpStatus = currentValues.humidity < 60;
+            // 控制水泵：水位低于30%时启动，高于或等于90%时关闭
+            const pumpStatus = currentValues.humidity < 30 && currentValues.humidity < 90;
             const pumpElement = document.querySelector('.device-item:nth-child(1) .status-indicator');
-            const pumpText = document.querySelector('.device-item:nth-child(1) span:last-child');
+            const pumpText = document.querySelector('.device-item:nth-child(1) span:nth-child(3)');
             if (pumpStatus) {
                 pumpElement.className = 'status-indicator on';
                 pumpText.textContent = 'ON';
@@ -537,10 +553,10 @@
                 pumpText.textContent = 'OFF';
             }
             
-            // 控制加热器：温度低于20°C时启动
-            const heaterStatus = currentValues.temperature < 20;
+            // 控制加热器：温度低于20°C时启动，高于或等于80°C时关闭
+            const heaterStatus = currentValues.temperature < 20 && currentValues.temperature < 80;
             const heaterElement = document.querySelector('.device-item:nth-child(3) .status-indicator');
-            const heaterText = document.querySelector('.device-item:nth-child(3) span:last-child');
+            const heaterText = document.querySelector('.device-item:nth-child(3) span:nth-child(3)');
             if (heaterStatus) {
                 heaterElement.className = 'status-indicator on';
                 heaterText.textContent = 'ON';
@@ -573,17 +589,37 @@
             setInterval(updateTime, 1000);
         };
         
+        // 手动控制设备
+        function toggleDevice(device) {
+            if (device === 'pump') {
+                const pumpElement = document.querySelector('.device-item:nth-child(1) .status-indicator');
+                const pumpText = document.querySelector('.device-item:nth-child(1) span:nth-child(3)');
+                if (pumpElement.classList.contains('on')) {
+                    pumpElement.className = 'status-indicator off';
+                    pumpText.textContent = 'OFF';
+                } else {
+                    pumpElement.className = 'status-indicator on';
+                    pumpText.textContent = 'ON';
+                }
+            } else if (device === 'heater') {
+                const heaterElement = document.querySelector('.device-item:nth-child(3) .status-indicator');
+                const heaterText = document.querySelector('.device-item:nth-child(3) span:nth-child(3)');
+                if (heaterElement.classList.contains('on')) {
+                    heaterElement.className = 'status-indicator off';
+                    heaterText.textContent = 'OFF';
+                } else {
+                    heaterElement.className = 'status-indicator on';
+                    heaterText.textContent = 'ON';
+                }
+            }
+        }
+        
         // 导航菜单点击事件
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', function() {
                 document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
                 this.classList.add('active');
             });
-        });
-        
-        // 手动设置按钮点击事件
-        document.querySelector('.manual-btn').addEventListener('click', function() {
-            alert('手动设置功能开发中...');
         });
     </script>
 </body>
