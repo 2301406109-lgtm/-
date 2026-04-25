@@ -305,10 +305,6 @@
             </div>
             <div class="nav-item">
                 <span>02</span>
-                <span>参数设置</span>
-            </div>
-            <div class="nav-item">
-                <span>03</span>
                 <span>设备日志</span>
             </div>
         </div>
@@ -330,7 +326,7 @@
                 <div class="data-grid">
                     <div class="data-card normal">
                         <div class="label">温度</div>
-                        <div class="value">26.4°C</div>
+                        <div class="value">26°C</div>
                         <div class="trend">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M8 3L4 7H12L8 3Z" fill="#4CAF50"/>
@@ -339,9 +335,9 @@
                         </div>
                         <div class="threshold">THRESHOLD: 20-30°C</div>
                         <div class="control-buttons">
-                            <button class="adjust-btn" onclick="adjustValue('temperature', -0.1)">-</button>
-                            <button class="adjust-btn" onclick="adjustValue('temperature', 0.1)">+</button>
-                        </div>
+                                <button class="adjust-btn" onclick="adjustValue('temperature', -1)">-</button>
+                                <button class="adjust-btn" onclick="adjustValue('temperature', 1)">+</button>
+                            </div>
                     </div>
                     
                     <div class="data-card warning">
@@ -443,7 +439,7 @@
     <script>
         // 全局变量存储当前值
         let currentValues = {
-            temperature: 26.4,
+            temperature: 26,
             humidity: 68,
             light: 1240
         };
@@ -452,8 +448,8 @@
         function adjustValue(type, delta) {
             switch(type) {
                 case 'temperature':
-                    currentValues.temperature = Math.max(2, Math.min(80, Number((currentValues.temperature + delta).toFixed(1))));
-                    document.querySelector('.data-card:nth-child(1) .value').textContent = currentValues.temperature.toFixed(1) + '°C';
+                    currentValues.temperature = Math.max(2, Math.min(80, currentValues.temperature + delta));
+                    document.querySelector('.data-card:nth-child(1) .value').textContent = currentValues.temperature + '°C';
                     updateStatus();
                     break;
                 case 'humidity':
@@ -522,11 +518,59 @@
                 lightCard.querySelector('.trend span').textContent = 'HIGH';
                 lightCard.querySelector('.trend span').style.color = '#ff4444';
             }
+            
+            // 自动控制逻辑
+            updateDeviceStatus();
+        }
+        
+        // 自动控制设备状态
+        function updateDeviceStatus() {
+            // 控制水泵：水位低于60%时启动
+            const pumpStatus = currentValues.humidity < 60;
+            const pumpElement = document.querySelector('.device-item:nth-child(1) .status-indicator');
+            const pumpText = document.querySelector('.device-item:nth-child(1) span:last-child');
+            if (pumpStatus) {
+                pumpElement.className = 'status-indicator on';
+                pumpText.textContent = 'ON';
+            } else {
+                pumpElement.className = 'status-indicator off';
+                pumpText.textContent = 'OFF';
+            }
+            
+            // 控制加热器：温度低于20°C时启动
+            const heaterStatus = currentValues.temperature < 20;
+            const heaterElement = document.querySelector('.device-item:nth-child(3) .status-indicator');
+            const heaterText = document.querySelector('.device-item:nth-child(3) span:last-child');
+            if (heaterStatus) {
+                heaterElement.className = 'status-indicator on';
+                heaterText.textContent = 'ON';
+            } else {
+                heaterElement.className = 'status-indicator off';
+                heaterText.textContent = 'OFF';
+            }
+        }
+        
+        // 更新时间显示
+        function updateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            const timeString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            document.querySelector('.header .status').textContent = `更新于 ${timeString}`;
+            document.querySelector('.system-status div:last-child').textContent = `LAST SYNC: ${hours}:${minutes}:${seconds}`;
         }
         
         // 初始化
         window.onload = function() {
             updateStatus();
+            updateTime();
+            // 每秒钟更新时间
+            setInterval(updateTime, 1000);
         };
         
         // 导航菜单点击事件
