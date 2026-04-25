@@ -583,25 +583,34 @@
         
         // 手动控制设备
         function toggleDevice(device) {
+            console.log('切换设备:', device);
             if (device === 'pump') {
-                const pumpElement = document.querySelector('.device-item:nth-child(1) .status-indicator');
-                const pumpText = document.querySelector('.device-item:nth-child(1) div span:nth-child(3)');
-                if (pumpElement.classList.contains('on')) {
-                    pumpElement.className = 'status-indicator off';
-                    pumpText.textContent = 'OFF';
-                } else {
-                    pumpElement.className = 'status-indicator on';
-                    pumpText.textContent = 'ON';
+                const pumpElement = document.querySelector('.device-status .device-item:nth-child(1) .status-indicator');
+                const pumpText = document.querySelector('.device-status .device-item:nth-child(1) div span:nth-child(3)');
+                console.log('水泵元素:', pumpElement);
+                console.log('水泵文本:', pumpText);
+                if (pumpElement && pumpText) {
+                    if (pumpElement.classList.contains('on')) {
+                        pumpElement.className = 'status-indicator off';
+                        pumpText.textContent = 'OFF';
+                    } else {
+                        pumpElement.className = 'status-indicator on';
+                        pumpText.textContent = 'ON';
+                    }
                 }
             } else if (device === 'heater') {
-                const heaterElement = document.querySelector('.device-item:nth-child(3) .status-indicator');
-                const heaterText = document.querySelector('.device-item:nth-child(3) div span:nth-child(3)');
-                if (heaterElement.classList.contains('on')) {
-                    heaterElement.className = 'status-indicator off';
-                    heaterText.textContent = 'OFF';
-                } else {
-                    heaterElement.className = 'status-indicator on';
-                    heaterText.textContent = 'ON';
+                const heaterElement = document.querySelector('.device-status .device-item:nth-child(3) .status-indicator');
+                const heaterText = document.querySelector('.device-status .device-item:nth-child(3) div span:nth-child(3)');
+                console.log('加热器元素:', heaterElement);
+                console.log('加热器文本:', heaterText);
+                if (heaterElement && heaterText) {
+                    if (heaterElement.classList.contains('on')) {
+                        heaterElement.className = 'status-indicator off';
+                        heaterText.textContent = 'OFF';
+                    } else {
+                        heaterElement.className = 'status-indicator on';
+                        heaterText.textContent = 'ON';
+                    }
                 }
             }
         }
