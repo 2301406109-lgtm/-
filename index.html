@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>单片机控制器 - 实时监控</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -158,6 +157,28 @@
             font-size: 10px;
             color: #666;
             margin-top: 10px;
+        }
+        
+        .control-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .adjust-btn {
+            flex: 1;
+            padding: 8px;
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .adjust-btn:hover {
+            background-color: #444;
         }
         
         /* 图表区域 */
@@ -334,6 +355,10 @@
                             <span style="color: #4CAF50;">NORMAL</span>
                         </div>
                         <div class="threshold">THRESHOLD: 20-30°C</div>
+                        <div class="control-buttons">
+                            <button class="adjust-btn" onclick="adjustValue('temperature', -1)">-</button>
+                            <button class="adjust-btn" onclick="adjustValue('temperature', 1)">+</button>
+                        </div>
                     </div>
                     
                     <div class="data-card warning">
@@ -346,6 +371,10 @@
                             <span style="color: #ff9800;">WARNING</span>
                         </div>
                         <div class="threshold">THRESHOLD: 60-90%</div>
+                        <div class="control-buttons">
+                            <button class="adjust-btn" onclick="adjustValue('humidity', -1)">-</button>
+                            <button class="adjust-btn" onclick="adjustValue('humidity', 1)">+</button>
+                        </div>
                     </div>
                     
                     <div class="data-card optimal">
@@ -358,14 +387,10 @@
                             <span style="color: #2196F3;">OPTIMAL</span>
                         </div>
                         <div class="threshold">THRESHOLD: 800-2000 lux</div>
-                    </div>
-                </div>
-                
-                <!-- 传感器趋势图 -->
-                <div class="chart-section">
-                    <h3>传感器趋势图</h3>
-                    <div class="chart-container">
-                        <canvas id="sensorChart"></canvas>
+                        <div class="control-buttons">
+                            <button class="adjust-btn" onclick="adjustValue('light', -50)">-</button>
+                            <button class="adjust-btn" onclick="adjustValue('light', 50)">+</button>
+                        </div>
                     </div>
                 </div>
                 
@@ -433,119 +458,92 @@
     </div>
     
     <script>
-        // 生成模拟数据
-        function generateData() {
-            const labels = [];
-            const temperatureData = [];
-            const humidityData = [];
-            const lightData = [];
-            
-            const now = new Date();
-            for (let i = 6; i >= 0; i--) {
-                const time = new Date(now.getTime() - i * 10 * 60000); // 每10分钟一个数据点
-                labels.push(time.getHours() + ':' + (time.getMinutes() < 10 ? '0' : '') + time.getMinutes());
-                
-                // 生成趋势数据
-                temperatureData.push(20 + Math.random() * 10 + i * 0.2);
-                humidityData.push(60 + Math.random() * 20 - i * 0.5);
-                lightData.push(800 + Math.random() * 1200 + i * 50);
+        // 全局变量存储当前值
+        let currentValues = {
+            temperature: 26.4,
+            humidity: 68.2,
+            light: 1240
+        };
+        
+        // 参数调整函数
+        function adjustValue(type, delta) {
+            switch(type) {
+                case 'temperature':
+                    currentValues.temperature = Math.max(0, Math.min(100, currentValues.temperature + delta));
+                    document.querySelector('.data-card:nth-child(1) .value').textContent = currentValues.temperature.toFixed(1) + '°C';
+                    updateStatus();
+                    break;
+                case 'humidity':
+                    currentValues.humidity = Math.max(0, Math.min(100, currentValues.humidity + delta));
+                    document.querySelector('.data-card:nth-child(2) .value').textContent = currentValues.humidity.toFixed(1) + '%';
+                    updateStatus();
+                    break;
+                case 'light':
+                    currentValues.light = Math.max(0, Math.min(5000, currentValues.light + delta));
+                    document.querySelector('.data-card:nth-child(3) .value').textContent = Math.round(currentValues.light) + ' lux';
+                    updateStatus();
+                    break;
+            }
+            console.log('调整参数:', type, '新值:', currentValues[type]);
+        }
+        
+        // 更新状态显示
+        function updateStatus() {
+            // 更新温度状态
+            const tempCard = document.querySelector('.data-card:nth-child(1)');
+            tempCard.className = 'data-card';
+            if (currentValues.temperature >= 20 && currentValues.temperature <= 30) {
+                tempCard.classList.add('normal');
+                tempCard.querySelector('.trend span').textContent = 'NORMAL';
+                tempCard.querySelector('.trend span').style.color = '#4CAF50';
+            } else if (currentValues.temperature < 20) {
+                tempCard.classList.add('warning');
+                tempCard.querySelector('.trend span').textContent = 'LOW';
+                tempCard.querySelector('.trend span').style.color = '#ff9800';
+            } else {
+                tempCard.classList.add('warning');
+                tempCard.querySelector('.trend span').textContent = 'HIGH';
+                tempCard.querySelector('.trend span').style.color = '#ff4444';
             }
             
-            return { labels, temperatureData, humidityData, lightData };
-        }
-        
-        // 初始化图表
-        function initChart() {
-            const ctx = document.getElementById('sensorChart').getContext('2d');
-            const data = generateData();
+            // 更新水位状态
+            const humidityCard = document.querySelector('.data-card:nth-child(2)');
+            humidityCard.className = 'data-card';
+            if (currentValues.humidity >= 60 && currentValues.humidity <= 90) {
+                humidityCard.classList.add('normal');
+                humidityCard.querySelector('.trend span').textContent = 'NORMAL';
+                humidityCard.querySelector('.trend span').style.color = '#4CAF50';
+            } else if (currentValues.humidity < 60) {
+                humidityCard.classList.add('warning');
+                humidityCard.querySelector('.trend span').textContent = 'LOW';
+                humidityCard.querySelector('.trend span').style.color = '#ff9800';
+            } else {
+                humidityCard.classList.add('warning');
+                humidityCard.querySelector('.trend span').textContent = 'HIGH';
+                humidityCard.querySelector('.trend span').style.color = '#ff4444';
+            }
             
-            const chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.labels,
-                    datasets: [
-                        {
-                            label: '温度',
-                            data: data.temperatureData,
-                            borderColor: '#ff4444',
-                            backgroundColor: 'rgba(255, 68, 68, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        },
-                        {
-                            label: '湿度',
-                            data: data.humidityData,
-                            borderColor: '#2196F3',
-                            backgroundColor: 'rgba(33, 150, 243, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        },
-                        {
-                            label: '光照',
-                            data: data.lightData,
-                            borderColor: '#ffc107',
-                            backgroundColor: 'rgba(255, 193, 7, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                color: '#ffffff'
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#ffffff'
-                            }
-                        },
-                        y: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#ffffff'
-                            }
-                        }
-                    }
-                }
-            });
-            
-            return chart;
-        }
-        
-        // 定期更新数据
-        function updateData() {
-            const data = generateData();
-            chart.data.labels = data.labels;
-            chart.data.datasets[0].data = data.temperatureData;
-            chart.data.datasets[1].data = data.humidityData;
-            chart.data.datasets[2].data = data.lightData;
-            chart.update();
-            
-            // 更新卡片数据
-            document.querySelector('.data-card:nth-child(1) .value').textContent = data.temperatureData[data.temperatureData.length - 1].toFixed(1) + '°C';
-            document.querySelector('.data-card:nth-child(2) .value').textContent = data.humidityData[data.humidityData.length - 1].toFixed(1) + '%';
-            document.querySelector('.data-card:nth-child(3) .value').textContent = Math.round(data.lightData[data.lightData.length - 1]) + ' lux';
+            // 更新光照状态
+            const lightCard = document.querySelector('.data-card:nth-child(3)');
+            lightCard.className = 'data-card';
+            if (currentValues.light >= 800 && currentValues.light <= 2000) {
+                lightCard.classList.add('optimal');
+                lightCard.querySelector('.trend span').textContent = 'OPTIMAL';
+                lightCard.querySelector('.trend span').style.color = '#2196F3';
+            } else if (currentValues.light < 800) {
+                lightCard.classList.add('warning');
+                lightCard.querySelector('.trend span').textContent = 'LOW';
+                lightCard.querySelector('.trend span').style.color = '#ff9800';
+            } else {
+                lightCard.classList.add('warning');
+                lightCard.querySelector('.trend span').textContent = 'HIGH';
+                lightCard.querySelector('.trend span').style.color = '#ff4444';
+            }
         }
         
         // 初始化
-        let chart;
         window.onload = function() {
-            chart = initChart();
-            // 每30秒更新一次数据
-            setInterval(updateData, 30000);
+            updateStatus();
         };
         
         // 导航菜单点击事件
