@@ -384,6 +384,12 @@
             light: 1240
         };
         
+        // 设备控制模式：auto 或 manual
+        let deviceModes = {
+            pump: 'auto',
+            heater: 'auto'
+        };
+        
         // 参数调整函数
         function adjustValue(type, delta) {
             switch(type) {
@@ -468,7 +474,7 @@
             const pumpStatus = currentValues.humidity < 30 && currentValues.humidity < 90;
             const pumpElement = document.querySelector('.device-status .device-item:nth-child(1) .status-indicator');
             const pumpText = document.querySelector('.device-status .device-item:nth-child(1) div span:nth-child(3)');
-            if (pumpElement && pumpText) {
+            if (pumpElement && pumpText && deviceModes.pump === 'auto') {
                 if (pumpStatus) {
                     pumpElement.className = 'status-indicator on';
                     pumpText.textContent = 'ON';
@@ -482,7 +488,7 @@
             const heaterStatus = currentValues.temperature < 20 && currentValues.temperature < 80;
             const heaterElement = document.querySelector('.device-status .device-item:nth-child(2) .status-indicator');
             const heaterText = document.querySelector('.device-status .device-item:nth-child(2) div span:nth-child(3)');
-            if (heaterElement && heaterText) {
+            if (heaterElement && heaterText && deviceModes.heater === 'auto') {
                 if (heaterStatus) {
                     heaterElement.className = 'status-indicator on';
                     heaterText.textContent = 'ON';
@@ -498,6 +504,8 @@
             const pumpElement = document.querySelector('.device-status .device-item:nth-child(1) .status-indicator');
             const pumpText = document.querySelector('.device-status .device-item:nth-child(1) div span:nth-child(3)');
             if (pumpElement && pumpText) {
+                // 切换到手动模式
+                deviceModes.pump = 'manual';
                 if (pumpElement.classList.contains('on')) {
                     pumpElement.className = 'status-indicator off';
                     pumpText.textContent = 'OFF';
@@ -513,6 +521,8 @@
             const heaterElement = document.querySelector('.device-status .device-item:nth-child(2) .status-indicator');
             const heaterText = document.querySelector('.device-status .device-item:nth-child(2) div span:nth-child(3)');
             if (heaterElement && heaterText) {
+                // 切换到手动模式
+                deviceModes.heater = 'manual';
                 if (heaterElement.classList.contains('on')) {
                     heaterElement.className = 'status-indicator off';
                     heaterText.textContent = 'OFF';
