@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单片机控制器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .control-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .control-section h2 {
+            margin-top: 0;
+            color: #555;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-on {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-off {
+            background-color: #f44336;
+            color: white;
+        }
+        .btn-default {
+            background-color: #2196F3;
+            color: white;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .status-item {
+            margin: 5px 0;
+        }
+        .slider-container {
+            margin: 15px 0;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .slider-value {
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>单片机控制器</h1>
+        
+        <div class="control-section">
+            <h2>LED控制</h2>
+            <div class="button-group">
+                <button class="btn-on" onclick="controlLED('on')">打开LED</button>
+                <button class="btn-off" onclick="controlLED('off')">关闭LED</button>
+            </div>
+            <div class="status">
+                <div class="status-item">LED状态: <span id="led-status">未连接</span></div>
+            </div>
+        </div>
+        
+        <div class="control-section">
+            <h2>电机控制</h2>
+            <div class="button-group">
+                <button class="btn-default" onclick="controlMotor('forward')">正转</button>
+                <button class="btn-default" onclick="controlMotor('backward')">反转</button>
+                <button class="btn-off" onclick="controlMotor('stop')">停止</button>
+            </div>
+            <div class="status">
+                <div class="status-item">电机状态: <span id="motor-status">未连接</span></div>
+            </div>
+        </div>
+        
+        <div class="control-section">
+            <h2>PWM控制</h2>
+            <div class="slider-container">
+                <label for="pwm-slider">PWM值 (0-255):</label>
+                <input type="range" id="pwm-slider" min="0" max="255" value="128" oninput="updatePWM(this.value)">
+                <div class="slider-value" id="pwm-value">128</div>
+            </div>
+        </div>
+        
+        <div class="control-section">
+            <h2>传感器数据</h2>
+            <div class="status">
+                <div class="status-item">温度: <span id="temperature">--°C</span></div>
+                <div class="status-item">湿度: <span id="humidity">--%</span></div>
+                <div class="status-item">光照: <span id="light">--lux</span></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script>
+        // WebSocket连接
+        const socket = io();
+        
+        // 连接状态处理
+        socket.on('connectionStatus', (data) => {
+            console.log('连接状态:', data.connected);
+            if (data.connected) {
+                document.getElementById('led-status').textContent = '已连接';
+                document.getElementById('motor-status').textContent = '已连接';
+            } else {
+                document.getElementById('led-status').textContent = '未连接';
+                document.getElementById('motor-status').textContent = '未连接';
+            }
+        });
+        
+        // 传感器数据处理
+        socket.on('sensorData', (data) => {
+            console.log('收到传感器数据:', data);
+            // 解析传感器数据
+            // 这里假设数据格式为 "TEMP:25.5,HUM:65.2,LIGHT:500"
+            const values = data.data.split(',');
+            values.forEach(value => {
+                const [type, val] = value.split(':');
+                switch(type) {
+                    case 'TEMP':
+                        document.getElementById('temperature').textContent = val + '°C';
+                        break;
+                    case 'HUM':
+                        document.getElementById('humidity').textContent = val + '%';
+                        break;
+                    case 'LIGHT':
+                        document.getElementById('light').textContent = val + 'lux';
+                        break;
+                }
+            });
+        });
+        
+        // 控制函数
+        function controlLED(status) {
+            document.getElementById('led-status').textContent = status === 'on' ? '开启' : '关闭';
+            console.log('控制LED:', status);
+            // 发送控制命令到服务器
+            socket.emit('controlLED', status);
+        }
+        
+        function controlMotor(direction) {
+            let statusText = '';
+            switch(direction) {
+                case 'forward':
+                    statusText = '正转';
+                    break;
+                case 'backward':
+                    statusText = '反转';
+                    break;
+                case 'stop':
+                    statusText = '停止';
+                    break;
+            }
+            document.getElementById('motor-status').textContent = statusText;
+            console.log('控制电机:', direction);
+            // 发送控制命令到服务器
+            socket.emit('controlMotor', direction);
+        }
+        
+        function updatePWM(value) {
+            document.getElementById('pwm-value').textContent = value;
+            console.log('更新PWM值:', value);
+            // 发送控制命令到服务器
+            socket.emit('controlPWM', value);
+        }
+        
+        // 模拟传感器数据更新（当串口未连接时使用）
+        function updateSensorData() {
+            // 模拟数据
+            const temperature = (Math.random() * 10 + 20).toFixed(1);
+            const humidity = (Math.random() * 20 + 60).toFixed(1);
+            const light = Math.floor(Math.random() * 1000);
+            
+            document.getElementById('temperature').textContent = temperature + '°C';
+            document.getElementById('humidity').textContent = humidity + '%';
+            document.getElementById('light').textContent = light + 'lux';
+        }
+        
+        // 每2秒更新一次传感器数据（仅作为备用）
+        setInterval(updateSensorData, 2000);
+        
+        // 初始更新
+        updateSensorData();
+    </script>
+</body>
+</html>
