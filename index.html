@@ -452,7 +452,7 @@
         function adjustValue(type, delta) {
             switch(type) {
                 case 'temperature':
-                    currentValues.temperature = Math.max(0, Math.min(100, currentValues.temperature + delta));
+                    currentValues.temperature = Math.max(0, Math.min(100, Number((currentValues.temperature + delta).toFixed(1))));
                     document.querySelector('.data-card:nth-child(1) .value').textContent = currentValues.temperature.toFixed(1) + '°C';
                     updateStatus();
                     break;
